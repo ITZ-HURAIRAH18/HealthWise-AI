@@ -21,7 +21,7 @@ HealthWise AI is your personal, intelligent medical assistant chatbot. Designed 
 
 Experience HealthWise AI live in action!
 
-➡️ [**Launch HealthWise AI Demo**](https://ssword-generator18.vercel.app/)
+➡️ [**Launch HealthWise AI Demo**](https://health-wise-ai-chatbot.vercel.app/)
 
 ---
 
