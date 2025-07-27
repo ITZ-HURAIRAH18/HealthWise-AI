@@ -1,0 +1,33 @@
+/* Existing styles (leave them as-is if you have) */
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #212121; /* dark background */
+  color: white;
+}
+
+/* Chatbot container (if you have a wrapper, otherwise you can use a specific div selector) */
+.chat-container {
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #212121;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #bdbdbd; /* Light grey track */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #757575; /* Dark grey thumb */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #616161; /* Slightly darker thumb on hover */
+}
