@@ -28,7 +28,7 @@ const Chatbot = () => {
   // IMPORTANT: Replace with your actual API Key.
   // For production, never hardcode API keys directly in client-side code.
   // Use environment variables or a backend proxy.
-  const API_KEY = "https://github.com/ITZ-HURAIRAH18/HealthWise-AI.git";
+  const API_KEY = "AIzaSyBWkDcaP0O0D6NfTzFhYe9FVEsMGEtRvPc";
 
   const sendMessageToBot = async (query) => {
     setLoading(true);
