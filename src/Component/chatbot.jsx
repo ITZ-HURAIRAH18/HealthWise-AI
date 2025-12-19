@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Moon, Sun, Send, Copy } from 'lucide-react'; // Import Copy icon
+import { Moon, Sun, Send, Copy, Menu, X } from 'lucide-react'; // Import icons
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -8,6 +8,7 @@ const Chatbot = () => {
   const [input, setInput] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Added 4 more suggestions
   const [suggestions] = useState([
@@ -28,7 +29,7 @@ const Chatbot = () => {
   // IMPORTANT: Replace with your actual API Key.
   // For production, never hardcode API keys directly in client-side code.
   // Use environment variables or a backend proxy.
-  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY ;
+  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
   const sendMessageToBot = async (query) => {
     setLoading(true);
@@ -96,6 +97,7 @@ const Chatbot = () => {
   const handleSuggestionClick = async (suggestion) => {
     const userMessage = { text: suggestion, from: 'user' };
     setMessages((prev) => [...prev, userMessage]);
+    setShowSuggestions(false); // Close suggestions menu on mobile
     await sendMessageToBot(suggestion);
   };
 
@@ -117,23 +119,39 @@ const Chatbot = () => {
     <div
       className={`${
         darkMode ? 'bg-[#212121] text-white' : 'bg-white text-black'
-      } h-screen flex transition-colors duration-500 ease-in-out`}
+      } h-screen flex flex-col lg:flex-row transition-colors duration-500 ease-in-out relative`}
     >
-      {/* Suggestions Column (30%) */}
+      {/* Suggestions Column - Desktop sidebar, Mobile overlay */}
       <div
-        className={`w-[30%] p-6 border-r ${
-          darkMode ? 'bg-[#1a1a1a] border-gray-700' : 'bg-gray-50 border-gray-200'
-        } flex flex-col overflow-y-auto transition-colors duration-500 ease-in-out`}
+        className={`
+          ${showSuggestions ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          fixed lg:static inset-y-0 left-0 z-30 w-[85%] sm:w-[70%] lg:w-[30%] 
+          p-4 sm:p-6 border-r 
+          ${darkMode ? 'bg-[#1a1a1a] border-gray-700' : 'bg-gray-50 border-gray-200'} 
+          flex flex-col overflow-y-auto transition-all duration-300 ease-in-out
+          shadow-2xl lg:shadow-none
+        `}
       >
-        <h2 className="text-2xl font-semibold mb-6 tracking-wide select-none text-indigo-500">
+        {/* Close button for mobile */}
+        <button
+          onClick={() => setShowSuggestions(false)}
+          className={`lg:hidden self-end mb-4 p-2 rounded-full ${
+            darkMode ? 'bg-[#333333] hover:bg-[#444444]' : 'bg-gray-200 hover:bg-gray-300'
+          }`}
+          aria-label="Close suggestions"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 tracking-wide select-none text-indigo-500">
           Health Suggestions
         </h2>
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {suggestions.map((suggestion, index) => (
             <button
               key={index}
               onClick={() => handleSuggestionClick(suggestion)}
-              className={`w-full text-left p-4 rounded-xl shadow-md transform transition-transform duration-200 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+              className={`w-full text-left text-sm sm:text-base p-3 sm:p-4 rounded-xl shadow-md transform transition-transform duration-200 hover:scale-105 active:scale-95 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
                 darkMode
                   ? 'bg-[#333333] hover:bg-[#444444] text-white'
                   : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
@@ -146,46 +164,67 @@ const Chatbot = () => {
         </div>
       </div>
 
-      {/* Chat Area (70%) */}
-      <div className="flex-1 flex flex-col w-[70%]">
+      {/* Overlay for mobile when suggestions are open */}
+      {showSuggestions && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setShowSuggestions(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col w-full lg:w-[70%]">
         {/* Header */}
         <div
-          className={`p-6 flex justify-between items-center ${
+          className={`p-3 sm:p-4 lg:p-6 flex justify-between items-center ${
             darkMode ? 'bg-[#212121]' : 'bg-gray-100'
-          } sticky top-0 z-20 shadow-sm transition-colors duration-500 ease-in-out`}
+          } sticky top-0 z-10 shadow-sm transition-colors duration-500 ease-in-out`}
         >
-          <h1 className="text-3xl font-semibold tracking-tight select-none text-indigo-600 dark:text-indigo-400">
-            HealthWise AI
-          </h1>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Menu button for mobile */}
+            <button
+              onClick={() => setShowSuggestions(true)}
+              className={`lg:hidden p-2 rounded-full shadow-md hover:scale-110 active:scale-95 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                darkMode ? 'bg-[#212121] text-white' : 'bg-white text-black'
+              }`}
+              aria-label="Open suggestions menu"
+            >
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight select-none text-indigo-600 dark:text-indigo-400">
+              HealthWise AI
+            </h1>
+          </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            // Modified className for the toggle button
-            className={`p-3 rounded-full shadow-md hover:scale-110 active:scale-95 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+            className={`p-2 sm:p-3 rounded-full shadow-md hover:scale-110 active:scale-95 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
               darkMode ? 'bg-[#212121] text-white' : 'bg-white text-black'
             }`}
             aria-label="Toggle dark mode"
           >
             {darkMode ? (
-              <Sun className="w-6 h-6 text-yellow-400" />
+              <Sun className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
             ) : (
-              <Moon className="w-6 h-6 text-gray-800" />
+              <Moon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
             )}
           </button>
         </div>
 
         {/* Chat Messages */}
-        {/* The overflow-y-auto will still allow manual scrolling if content exceeds height */}
         <div
           ref={messagesEndRef}
-          className="flex-1 overflow-y-auto px-6 py-4 space-y-5 scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-transparent"
+          className="flex-1 overflow-y-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 space-y-3 sm:space-y-5 scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-transparent"
           style={{ scrollBehavior: 'smooth' }}
-          tabIndex={0} // For accessibility
+          tabIndex={0}
           aria-live="polite"
         >
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`relative px-6 py-4 rounded-2xl max-w-[70%] whitespace-pre-wrap break-words shadow-md transform transition duration-500 ease-in-out 
+              className={`relative px-3 sm:px-4 lg:px-6 py-3 sm:py-4 rounded-2xl 
+              max-w-[90%] sm:max-w-[85%] lg:max-w-[70%] 
+              whitespace-pre-wrap break-words shadow-md transform transition duration-500 ease-in-out 
               animate-fade-slide ${
                 msg.from === 'user'
                   ? darkMode
@@ -198,7 +237,7 @@ const Chatbot = () => {
               style={{ wordBreak: 'break-word' }}
             >
               <div
-                className={msg.from === 'bot' ? 'prose prose-sm max-w-full' : ''}
+                className={msg.from === 'bot' ? 'prose prose-sm sm:prose-base max-w-full text-sm sm:text-base' : 'text-sm sm:text-base'}
                 dangerouslySetInnerHTML={{
                   __html: msg.text
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // bold
@@ -214,18 +253,20 @@ const Chatbot = () => {
               {msg.from === 'bot' && (
                 <button
                   onClick={() => copyToClipboard(msg.text)}
-                  className={`absolute bottom-3 right-3 p-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 transition duration-200`}
+                  className={`absolute bottom-2 sm:bottom-3 right-2 sm:right-3 p-1.5 sm:p-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 transition duration-200`}
                   title="Copy to clipboard"
                   aria-label="Copy bot message to clipboard"
                 >
-                  <Copy className="w-4 h-4" />
+                  <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               )}
             </div>
           ))}
           {loading && (
             <div
-              className={`px-6 py-4 rounded-2xl max-w-[70%] text-center font-semibold shadow-md animate-pulse ${
+              className={`px-3 sm:px-4 lg:px-6 py-3 sm:py-4 rounded-2xl 
+              max-w-[90%] sm:max-w-[85%] lg:max-w-[70%] 
+              text-center text-sm sm:text-base font-semibold shadow-md animate-pulse ${
                 darkMode
                   ? 'bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-gray-900/50'
                   : 'bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-blue-600/50'
@@ -238,13 +279,13 @@ const Chatbot = () => {
 
         {/* Input Bar */}
         <div
-          className={`p-6 border-t flex items-center gap-4 ${
+          className={`p-3 sm:p-4 lg:p-6 border-t flex items-center gap-2 sm:gap-3 lg:gap-4 ${
             darkMode ? 'bg-[#212121] border-gray-700' : 'bg-gray-100 border-gray-300'
-          } sticky bottom-0 z-20 shadow-inner transition-colors duration-500 ease-in-out`}
+          } sticky bottom-0 z-10 shadow-inner transition-colors duration-500 ease-in-out`}
         >
           <input
             type="text"
-            className={`flex-1 p-4 rounded-2xl border border-transparent outline-none placeholder-gray-400 text-lg font-medium shadow-md focus:ring-4 focus:ring-indigo-400 transition-all duration-300 ${
+            className={`flex-1 p-3 sm:p-4 rounded-2xl border border-transparent outline-none placeholder-gray-400 text-sm sm:text-base lg:text-lg font-medium shadow-md focus:ring-4 focus:ring-indigo-400 transition-all duration-300 ${
               darkMode
                 ? 'bg-[#303030] text-white focus:ring-indigo-600'
                 : 'bg-white text-gray-800 focus:ring-indigo-400'
@@ -258,14 +299,14 @@ const Chatbot = () => {
           <button
             onClick={handleSend}
             disabled={loading}
-            className={`p-4 rounded-2xl shadow-lg transition-transform duration-200 active:scale-95 focus:outline-none focus:ring-4 focus:ring-indigo-500 flex items-center justify-center ${
+            className={`p-3 sm:p-4 rounded-2xl shadow-lg transition-transform duration-200 active:scale-95 focus:outline-none focus:ring-4 focus:ring-indigo-500 flex items-center justify-center ${
               darkMode
                 ? 'bg-indigo-700 hover:bg-indigo-800 disabled:bg-indigo-900 text-white'
                 : 'bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 text-white'
             }`}
             aria-label="Send message"
           >
-            <Send className="w-6 h-6" />
+            <Send className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
@@ -285,9 +326,14 @@ const Chatbot = () => {
             animation: fadeSlideIn 0.4s ease forwards;
           }
 
-          /* Optional: Styled scrollbar */
+          /* Styled scrollbar */
           ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
+          }
+          @media (min-width: 640px) {
+            ::-webkit-scrollbar {
+              width: 8px;
+            }
           }
           ::-webkit-scrollbar-thumb {
             background-color: #6366f1; /* Indigo-500 */
@@ -295,6 +341,13 @@ const Chatbot = () => {
           }
           ::-webkit-scrollbar-track {
             background: transparent;
+          }
+
+          /* Ensure mobile viewport height is properly calculated */
+          @supports (-webkit-touch-callout: none) {
+            .h-screen {
+              height: -webkit-fill-available;
+            }
           }
         `}</style>
       </div>
