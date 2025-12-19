@@ -28,14 +28,14 @@ const Chatbot = () => {
   // IMPORTANT: Replace with your actual API Key.
   // For production, never hardcode API keys directly in client-side code.
   // Use environment variables or a backend proxy.
-  const API_KEY = "https://github.com/ITZ-HURAIRAH18/HealthWise-AI.git";
+  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY ;
 
   const sendMessageToBot = async (query) => {
     setLoading(true);
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
         {
           method: 'POST',
           headers: {
@@ -58,6 +58,12 @@ const Chatbot = () => {
         }
       );
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API Error:', response.status, errorData);
+        throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      }
+
       const data = await response.json();
       const botReply =
         data?.candidates?.[0]?.content?.parts?.[0]?.text ||
@@ -66,9 +72,10 @@ const Chatbot = () => {
       setMessages((prev) => [...prev, { text: botReply, from: 'bot' }]);
     } catch (error) {
       console.error('Error:', error);
+      const errorMessage = error.message || "Something went wrong. Please try again later.";
       setMessages((prev) => [
         ...prev,
-        { text: "Something went wrong. Please try again later.", from: 'bot' },
+        { text: `Error: ${errorMessage}`, from: 'bot' },
       ]);
     } finally {
       setLoading(false);
