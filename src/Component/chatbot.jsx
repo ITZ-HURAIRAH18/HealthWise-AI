@@ -273,7 +273,7 @@ User's query: ${query}`,
           <div className="hw-sidebar-footer stagger-12 animate-slide-left">
             <div className="hw-powered-badge">
               <Sparkles size={12} />
-              Powered by Gemini AI
+              Powered by Hurairah
             </div>
           </div>
         </div>
